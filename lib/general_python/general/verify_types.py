@@ -176,9 +176,15 @@ class VerifyTypes(Constants):
         '''
         verify x is an ipv6 unicast address
         '''
-        if not isinstance(x, ipaddress.IPv6Address):
+        try:
+            _test = ipaddress.IPv6Address(x)
+        except ipaddress.AddressValueError as exception:
+            message = (
+                f"{x} is not a valid ipv6 address."
+                f"Exception detail: {exception}"
+            )
+            self.log.error(message)
             return False
-        _test = ipaddress.IPv6Address(x)
         bad_type = ''
         if _test.is_multicast:
             bad_type = 'is_multicast'
@@ -193,7 +199,7 @@ class VerifyTypes(Constants):
         elif re.search('\.0$', x):
             bad_type = 'is_subnet'
         if bad_type != '':
-            self.log.debug(f"{x} not a unicast ipv6 address -> {bad_type}")
+            self.log.error(f"{x} not a unicast ipv6 address -> {bad_type}")
             return False
         return True
 
